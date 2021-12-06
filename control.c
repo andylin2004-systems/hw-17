@@ -21,7 +21,7 @@
 
 int main(int argc, char *argv[])
 {
-    int semd, memd, v, r, file;
+    int semd, memd, file;
     char input[3];
 
     if (argc > 1)
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
             semd = semget(SEMKEY, 1, IPC_CREAT | IPC_EXCL | 0640);
             memd = shmget(MEMKEY, sizeof(int), IPC_CREAT | IPC_EXCL | 0640);
             if (semd == -1){
-                printf("%s\n", strerror(semd));
+                printf("Error: %s. There may already be an open semaphore session here.\n", strerror(errno));
             }else{
                 union semun us;
             us.val = 1;

@@ -13,8 +13,8 @@
 
 int main()
 {
-    int *data;
-    int semd, shmd, r, v, file;
+    int *lastLineLength;
+    int semd, shmd, file;
     semd = semget(SEMKEY, 1, 0);
     shmd = shmget(MEMKEY, 1, 0);
     struct sembuf sb;
@@ -22,7 +22,7 @@ int main()
     sb.sem_op = -1;
 
     semop(semd, &sb, 1);
-    // data = shmat()
+    lastLineLength = shmat(shmd, 0, 0);
 
     struct stat fileInfo;
     stat("telephone.txt", &fileInfo);
@@ -31,8 +31,8 @@ int main()
 
     if (fileInfo.st_size){
         file = open("telephone.txt", O_RDONLY, 0644);
+        lseek(file, *lastLineLength * -1 * sizeof(char), SEEK_END);
         read(file, fromFileContent, fileInfo.st_size);
-        fromFileContent = strrchr(fromFileContent, '\n');
         printf("Last line:\n%s", fromFileContent);
         close(file);
     }else{
@@ -43,6 +43,7 @@ int main()
     read(STDIN_FILENO, newIn, sizeof(char) * 1024);
     newIn[strlen(newIn) - 2] = '\0';
     write(file, newIn, sizeof(char) * strlen(newIn));
+    *lastLineLength = strlen(newIn);
 
     sb.sem_op = 1;
     semop(semd, &sb, 1);
