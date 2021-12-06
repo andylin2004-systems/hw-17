@@ -57,5 +57,7 @@ int main(int argc, char *argv[])
         }else{
             printf("Use args 'create' or 'remove' to use this.");
         }
+    }else{
+        printf("Use args 'create' or 'remove' to use this.");
     }
 }
