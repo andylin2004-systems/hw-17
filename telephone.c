@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
+// #include <limits.h>
 #define SEMKEY 42069
 #define MEMKEY 69420
 
@@ -26,22 +27,21 @@ int main()
 
     struct stat fileInfo;
     stat("telephone.txt", &fileInfo);
-    char newIn[1024];
+    char newIn[1024] = {0};
     char *fromFileContent = malloc(fileInfo.st_size);
 
     if (fileInfo.st_size){
         file = open("telephone.txt", O_RDONLY, 0644);
         lseek(file, *lastLineLength * -1 * sizeof(char), SEEK_END);
         read(file, fromFileContent, fileInfo.st_size);
-        printf("Last line:\n%s", fromFileContent);
+        printf("Last line:\n%sNew line:\n", fromFileContent);
         close(file);
     }else{
-        printf("Here's to the next chapter of a new story!\n");
+        printf("Here's to the next chapter of a new story!\nNew line:\n");
     }
 
     file = open("telephone.txt", O_WRONLY | O_APPEND, 0644);
     read(STDIN_FILENO, newIn, sizeof(char) * 1024);
-    newIn[strlen(newIn) - 2] = '\0';
     write(file, newIn, sizeof(char) * strlen(newIn));
     *lastLineLength = strlen(newIn);
 
