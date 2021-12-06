@@ -8,28 +8,48 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
-#define KEY 24601
+#include <errno.h>
+#define SEMKEY 42069
+#define MEMKEY 69420
 
-int main(int argc, char* argv[]){
-    int *data;
-    int shmd;
-    int semd;
+// union semun{
+//     int val;
+//     struct semid_ds *buf;
+//     unsigned short *array;
+//     struct seminfo *__buf;
+// };
+
+int main(int argc, char *argv[])
+{
+    int semd, memd, v, r, file;
+    char input[3];
+
     if (argc > 1)
     {
-        if (strcmp(argv[1], "create") == 0){
-            shmd = shmget(KEY, sizeof(int), IPC_CREAT | 0640);
-            data = shmat(shmd, 0, 0);
-            *data = open("telephone.txt", O_CREAT | O_RDWR | O_TRUNC, 0777);
-            semd = semget(KEY + 1, 1, IPC_CREAT);
-        }
-        else if (strcmp(argv[1], "remove") == 0)
+        if (strcmp(argv[1], "remove") == 0)
         {
-            struct stat fileInfo;
-            stat("telephone.txt", &fileInfo);
-            shmdt(data);
-            shmctl(shmd, IPC_RMID, 0);
-            char *story = malloc(fileInfo.st_size);
-            write(*data, story, fileInfo.st_size);
+            file = open("telephone.txt", O_RDONLY, 0644);
+            semd = semget(SEMKEY, 0, 0);
+            memd = shmget(MEMKEY, 0, 0);
+            semctl(semd, 0, IPC_RMID);
+            shmctl(memd, IPC_RMID, NULL);
+
+            struct stat filestat;
+            stat("telephone.txt", &filestat);
+            char *fileContent = malloc(filestat.st_size);
+            read(file, fileContent, filestat.st_size);
+            printf("%s\n", fileContent);
+            close(file);
+        }
+        else
+        {
+            semd = semget(SEMKEY, 1, IPC_CREAT | IPC_EXCL | 0640);
+            memd = shmget(MEMKEY, sizeof(int), IPC_CREAT | IPC_EXCL | 0640);
+            union semun us;
+            us.val = 1;
+            semctl(semd, 0, SETVAL, us);
+            file = open("telephone.txt", O_CREAT | O_WRONLY | O_TRUNC, 0644);
+            close(file);
         }
     }
 }
