@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
+
 #define SEMKEY 42069
 #define MEMKEY 69420
 
@@ -31,14 +32,14 @@ int main(int argc, char *argv[])
             file = open("telephone.txt", O_RDONLY, 0644);
             semd = semget(SEMKEY, 0, 0);
             memd = shmget(MEMKEY, 0, 0);
-            semctl(semd, 0, IPC_RMID);
-            shmctl(memd, IPC_RMID, NULL);
+            semctl(semd, IPC_RMID, 0);
+            shmctl(memd, IPC_RMID, 0);
 
             struct stat filestat;
             stat("telephone.txt", &filestat);
             char *fileContent = malloc(filestat.st_size);
             read(file, fileContent, filestat.st_size);
-            printf("%s\n", fileContent);
+            printf("The complete story: %s\n", fileContent);
             close(file);
         }
         else if (strcmp(argv[1], "create") == 0)
@@ -60,4 +61,5 @@ int main(int argc, char *argv[])
     }else{
         printf("Use args 'create' or 'remove' to use this.");
     }
+    return 0;
 }
