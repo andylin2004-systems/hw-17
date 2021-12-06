@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
             stat("telephone.txt", &filestat);
             char *fileContent = malloc(filestat.st_size);
             read(file, fileContent, filestat.st_size);
-            printf("The complete story: %s\n", fileContent);
+            printf("The complete story: \n%s\n", fileContent);
             close(file);
         }
         else if (strcmp(argv[1], "create") == 0)
