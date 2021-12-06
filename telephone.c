@@ -16,20 +16,29 @@ int main()
     int *data;
     int semd, shmd, r, v, file;
     semd = semget(SEMKEY, 1, 0);
+    shmd = shmget(MEMKEY, 1, 0);
     struct sembuf sb;
     sb.sem_num = 0;
     sb.sem_op = -1;
 
     semop(semd, &sb, 1);
+    // data = shmat()
 
-    char fromFileContent[1024];
     struct stat fileInfo;
     stat("telephone.txt", &fileInfo);
     char newIn[1024];
+    char *fromFileContent = malloc(fileInfo.st_size);
 
-    file = open("telephone.txt", O_RDONLY, 0644);
+    if (fileInfo.st_size){
+        file = open("telephone.txt", O_RDONLY, 0644);
+        read(file, fromFileContent, fileInfo.st_size);
+        fromFileContent = strrchr(fromFileContent, '\n');
+        printf("Last line:\n%s", fromFileContent);
+        close(file);
+    }else{
+        printf("Here's to the next chapter of a new story!\n");
+    }
 
-    close(file);
     file = open("telephone.txt", O_WRONLY | O_APPEND, 0644);
     read(STDIN_FILENO, newIn, sizeof(char) * 1024);
     newIn[strlen(newIn) - 2] = '\0';
@@ -37,4 +46,5 @@ int main()
 
     sb.sem_op = 1;
     semop(semd, &sb, 1);
+    return 0;
 }
